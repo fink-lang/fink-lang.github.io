@@ -1,0 +1,51 @@
+{
+  "name": "@fink/website",
+  "version": "0.0.0-semantically-released",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:fink-lang/fink-lang.github.io"
+  },
+  "bugs": "https://github.com/fink-lang/website/issues",
+  "homepage": "https://github.com/fink-lang/website",
+  "scripts": {
+    "default": "run server",
+    "server": "next dev",
+    "clean": "rimraf ./build",
+    "build": "run build:*",
+    "build:dir": "mkdir -p ./build/",
+    "build:next": "next build",
+    "build:export": "next export -o build",
+    "test": "run jest",
+    "jest": "jest --verbose --runInBand --no-cache ",
+    "deploy": "aws s3 sync ./build/  s3://fink-lang.org/",
+    "cd": "run clean test build release deploy",
+    "release": "semantic-release"
+  },
+  "devDependencies": {
+    "@fink/cli": "^6.0.0",
+    "@fink/larix": "^10.0.1",
+    "@fink/loxia": "^10.1.1",
+    "@mdx-js/loader": "^1.6.5",
+    "@next/mdx": "^9.4.4",
+    "commitizen": "^4.0.5",
+    "cz-conventional-changelog": "^3.1.0",
+    "fink-loader": "^1.0.0",
+    "jest-cli": "^26.0.1",
+    "next": "^9.4.4",
+    "npx-run": "^2.1.2",
+    "raw-loader": "^4.0.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "semantic-release": "^17.0.8"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}

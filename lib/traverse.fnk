@@ -1,0 +1,102 @@
+{chain} = import '@fink/std-lib/iter'
+
+walk_exprs = fn exprs, props:
+  pipe exprs:
+    map expr:
+      ...walk expr, props
+
+
+walk = fn expr, props={scope: {expr}}:
+  node = {expr, ...props}
+  parent = node
+
+  chain
+    [node]
+    match expr:
+      {type: 'module'}:
+        walk_exprs expr.exprs, {parent, decl: false, scope: node}
+
+      {type: 'block', op: 'match'}:
+        chain
+          walk_exprs expr.args, {parent, decl: false, scope: node.scope}
+          walk_exprs expr.exprs, {parent, decl: false, scope: node}
+
+      {type: 'block', op: 'pipe'}:
+        chain
+          walk_exprs expr.args, {parent, decl: false, scope: node.scope}
+          walk_exprs expr.exprs, {parent, decl: false, scope: node}
+
+      {type: 'block', args: []}:
+        chain
+          walk_exprs expr.args, {parent, decl: true, scope: node}
+          walk_exprs expr.exprs, {parent, decl: false, scope: node}
+
+      {type: 'block'}:
+        walk_exprs expr.exprs, {parent, decl: false, scope: node}
+
+      {type: 'call'}:
+        chain
+          walk expr.callee, {parent, decl: false, scope: node.scope}
+          walk_exprs expr.args, {parent, decl: false, scope: node.scope}
+
+      {type: 'object'}:
+        walk_exprs expr.exprs, {parent, decl: props.decl, scope: node.scope}
+
+      {type: 'object:prop', left: ? == expr.right}:
+        chain
+          walk expr.left, {parent, decl: props.decl, scope: node.scope}
+
+      {type: 'object:prop'}:
+        chain
+          walk expr.left, {parent, decl: false, scope: node.scope}
+          walk expr.right, {parent, decl: props.decl, scope: node.scope}
+
+      {type: 'member'}:
+        chain
+          walk expr.left, {parent, decl: false, scope: node.scope}
+          walk expr.right, {parent, decl: false, scope: node.scope}
+
+      {type: 'assign'}:
+        chain
+          walk expr.left, {parent, decl: true, scope: node.scope}
+          walk expr.right, {parent, decl: false, scope: node.scope}
+
+      {type: 'string', tag: {}}:
+        chain
+          walk expr.tag, {parent, decl: false, scope: node.scope}
+          walk_exprs expr.exprs, {parent, decl: false, scope: node.scope}
+
+      {type: 'string'}:
+        chain
+          walk_exprs expr.exprs, {parent, decl: false, scope: node.scope}
+
+      {type: 'array'}:
+        walk_exprs expr.exprs, {parent, decl: props.decl, scope: node.scope}
+
+      {type: 'group'}:
+        walk_exprs expr.exprs, {parent, decl: props.decl, scope: node.scope}
+
+      {left: {}, right: {}}:
+        chain
+          walk expr.left, {parent, decl: false, scope: node.scope}
+          walk expr.right, {parent, decl: false, scope: node.scope}
+
+      {right: {}}:
+        walk expr.right, {parent, decl: props.decl, scope: node.scope}
+
+      {op: 'try'}:
+        walk_exprs expr.exprs, {parent, decl: false, scope: node.scope}
+
+      {type: 'jsx-elem'}:
+        chain
+          walk_exprs expr.props, {parent, decl: false, scope: node.scope}
+          walk_exprs expr.children, {parent, decl: false, scope: node.scope}
+
+      {type: 'jsx-attr', value: {}}:
+        walk expr.value, {parent, decl: false, scope: node.scope}
+
+      {type: 'jsx-expr-container'}:
+        walk expr.expr, {parent, decl: false, scope: node.scope}
+
+      else:
+        []
