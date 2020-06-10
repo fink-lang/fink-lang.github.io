@@ -7,11 +7,11 @@ import data from '!!raw-loader!../lib/highlighter.fnk'
 
 ## expressions, operators, types
 
-Fink source code consists of a sequence of expressions, which themselves can be composed with operators to form new expressions.
+Fink source code consists of a sequence of expressions.
 
-An expression block is an expression consisting of a sequence of expressions with the same level of indentation.
-
-The value of an expression block is the value of the last expression, which dependents on the values of preceding expressions.
+Most of the time expressions are separated by a new line
+and have the same level of indentation.
+It is also possible to use `,` to separate them.
 
 
 ```fink
@@ -36,15 +36,15 @@ foobar = 123
 spam = foobar + 321
 
 spam
-# ~= 444
+# 444
 ```
 
 
 #### numbers
 
-Fink has support for integers, floating point values.
+Fink has support for integers and floating point values.
 
-There are integer, floating point, hexadecimal, octal and binary number literals that can be used in code.
+There are integer, floating point, hexadecimal, octal and binary literals that can be used in code.
 
 A `_` may be used as a spearator to make long numbers more readable.
 
@@ -69,25 +69,25 @@ The arithmitic operators `+`, `-`, `*`, `/`, `^`, `%` can be used with number va
 
 ```fink
 add = 1 + 2
-# ~= 3
+# 3
 
 subract = 1 - 2
-# ~= -1
+# -1
 
 multiply = 2 * 3
-# ~= 6
+# 6
 
 divide = 3 / 2
-# ~= 1.5
+# 1.5
 
 to_the_power = 2^3
-# ~= 8
+# 8
 
 modulus = 4 % 2
-# ~= 0
+# 0
 
 combined_with = 1 + 2 * 3 + (1 + 2) * 3
-# ~= 16
+# 16
 ```
 
 
@@ -140,7 +140,7 @@ not true
 not false
 # true
 
-1 > 2 and 2 > 3
+1 < 2 and 2 < 3
 # true
 ```
 
@@ -158,8 +158,23 @@ A string is any text delimited by `'`, `"` or ``` ` ```.
 
 Strings can span multiple lines, with block indentation automatically removed.
 
-As strings don't support any operators for e.g. concatination or repetition,
-fink strings can be used as templates using the `${...}` template expression syntax.
+Strings support comparison operators only:
+
+```fink
+'abc' < 'cde'
+
+'abc' <= 'abc'
+
+'ABC' > 'abc'
+
+'abc' >= 'abc'
+
+'abc' == 'abc'
+
+'spam' != 'ham'
+```
+
+Concatination of strings can be achieved using the `${...}` template expression syntax within strings.
 
 ```fink
 `
@@ -169,10 +184,10 @@ fink strings can be used as templates using the `${...}` template expression syn
   \${escaped to avoid templating}
 `
 
-# ~= foo: 6
-# ~=   bar spam
-# ~= ni
-# ~= ${escaped to avoid templating}
+# foo: 6
+#   bar spam
+# ni
+# ${escaped to avoid templating}
 ```
 
 For more advanced templating, strings can be prefixed with a template-tag,
@@ -219,10 +234,10 @@ There is a single operator 'in' that can be used with lists (and any other itera
 
 ```fink
 'foo' in ['foo', 'bar', 'spam']
-# ~= true
+# true
 
 'ni' in ['foo', 'bar', 'spam']
-# ~= false
+# false
 ```
 
 <!-- TODO add spread syntax docs here-->
@@ -258,12 +273,12 @@ Records can be used with the `.` operator to get the values for a key.
 foobar = {spam: 'ham', ni: 123}
 
 foobar.spam
-# ~= 'ham'
+# 'ham'
 
 
 key = 'spam'
 foobar.(key)
-# ~= 'ham'
+# 'ham'
 ```
 
 <!-- TODO add spread syntax docs here-->
@@ -280,7 +295,7 @@ foobar = fn spam, ham:
   '${foo}!'
 
 foobar 'spam', 'ni'
-# ~= 'spam is ni!'
+# 'spam is ni!'
 ```
 
 
@@ -297,12 +312,12 @@ As with record and list literals, nesting, shorthands, empty elements and spread
 {foobar: {spam}, shrub: ni} = {foobar: {spam: 'ham'}, shrub: 123, ni: 456}
 
 [spam, ni]
-# ~= 'ham' 123
+# 'ham' 123
 
 {foo, ...rest} = {foo: 'bar', spam: 'ham', shrub: 'ni'}
 
 [foo, rest]
-# ~= 'bar' {spam: 'ham', shrub: 'ni'}
+# 'bar' {spam: 'ham', shrub: 'ni'}
 ```
 
 <br />
@@ -311,7 +326,7 @@ As with record and list literals, nesting, shorthands, empty elements and spread
 [head, ...tail] = [1, 2, 3, 4, 5]
 
 [head, tail]
-# ~= [1, [2, 3, 4, 5]]
+# [1, [2, 3, 4, 5]]
 ```
 
 <br />
@@ -321,7 +336,7 @@ As with record and list literals, nesting, shorthands, empty elements and spread
 [first, ..., last] = [1, 2, 3, 4, 5]
 
 [first, last]
-# ~= [1, 5]
+# [1, 5]
 ```
 
 Destructuring also works for parameters in block expressions.
@@ -332,7 +347,7 @@ foo = fn [spam], {ham: ni=false}, , ...rest:
   [spam, ni, ...rest]
 
 foo ['ham'], {}, 123, 456, 789
-# ~= ['ham', false, 456, 789]
+# ['ham', false, 456, 789]
 ```
 
 
@@ -361,13 +376,13 @@ get_matching = fn obj:
 
 
 get_matching 123
-# ~= 'exact number'
+# 'exact number'
 
 get_matching 'foobar'
-# ~= 'exact string'
+# 'exact string'
 
 get_matching 'ni'
-# ~= 'no match'
+# 'no match'
 ```
 
 
@@ -388,16 +403,16 @@ get_matching = fn obj:
 
 
 get_matching [1, 2, 3, 2, 1]
-# ~= 'start and end [1, 2, 3, 2, 1]'
+# 'start and end [1, 2, 3, 2, 1]'
 
 get_matching [1, 1]
-# ~= 'list start and end [1, 1]'
+# 'list start and end [1, 1]'
 
 get_matching [1, [2, 3, 4]]
-# ~= 'nested [1, [2, 3, 4]]'
+# 'nested [1, [2, 3, 4]]'
 
 get_matching []
-# ~= 'no match'
+# 'no match'
 ```
 
 
@@ -418,13 +433,13 @@ get_matching = fn obj:
 
 
 get_matching {foo: 'bar', spam: 'ham', shrub: 'ni'}
-# ~= 'object {foo: 'bar', spam: 'ham', shrub: 'ni'}'
+# 'object {foo: 'bar', spam: 'ham', shrub: 'ni'}'
 
 get_matching {foo: 'bar', spam: {ham: 'ni'}}
-# ~= 'nested {foo: 'bar', spam: {ham: 'ni'}}'
+# 'nested {foo: 'bar', spam: {ham: 'ni'}}'
 
 get_matching {}
-# ~= 'no match'
+# 'no match'
 ```
 
 
@@ -453,16 +468,16 @@ get_matching = fn obj:
 
 
 get_matching 'ni'
-# ~= 'short iterable ni'
+# 'short iterable ni'
 
 get_matching 'bar'
-# ~= 'is in list bar'
+# 'is in list bar'
 
 get_matching {foo: 42}
-# ~= 'foo {foo: 42}'
+# 'foo {foo: 42}'
 
 get_matching 'shrub'
-# ~= 'no match'
+# 'no match'
 ```
 
 
@@ -487,7 +502,7 @@ add = fn a, b: a + b
 add_123 = add ?, 123
 
 add_123 321
-# ~= 444
+# 444
 ```
 
 
@@ -500,11 +515,11 @@ the result of one call to the next, starting with the pipe's initial value:
 
 ```fink
 pipe 1:
-  fn a: a + 1 # ~= 2
-  fn b: b * 2 # ~= 4
-  fn c: c - 1 # ~= 3
+  fn a: a + 1 # 2
+  fn b: b * 2 # 4
+  fn c: c - 1 # 3
 
-# ~= 3
+# 3
 ```
 
 
@@ -524,7 +539,7 @@ items = pipe [1, 2, 3, 4]:
     0 == item % 2
 
 [...items]
-# ~= [2, 4]
+# [2, 4]
 ````
 
 Keeping all while a condition holds `true`:
@@ -535,7 +550,7 @@ items = pipe [1, 2, 3, 4]:
     item < 3
 
 [...items]
-# ~= [1, 2]
+# [1, 2]
 ```
 
 
@@ -552,7 +567,7 @@ items = pipe [1, 2, 3]:
     item * 2
 
 [...items]
-# ~= [2, 4, 6]
+# [2, 4, 6]
 ```
 
 To make it easier to pass some state from one mapping step to the next, an accumulator can be added to the parameters and returned by using the tuple syntax.
@@ -571,7 +586,7 @@ items = pipe [1, 2, 3, 4]:
     (...all, not is_even_idx)
 
 [...items]
-# ~= [1, 2, 2, 3, 4, 4]
+# [1, 2, 2, 3, 4, 4]
 ```
 
 
@@ -587,7 +602,7 @@ range = fn start, stop:
       cntr <= stop
 
 [...range 1, 5]
-# ~= [1, 2, 3, 4, 5]
+# [1, 2, 3, 4, 5]
 ```
 
 
@@ -599,7 +614,7 @@ obj = pipe [['foo', 1], ['bar', 2]]:
     {...accu, (key): value}
 
 obj
-# ~= {foo: 1, bar: 2}
+# {foo: 1, bar: 2}
 ```
 
 

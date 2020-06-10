@@ -30,6 +30,7 @@
     "@fink/cli": "^6.0.0",
     "@fink/larix": "^10.0.1",
     "@fink/loxia": "^10.1.1",
+    "@fink/std-lib": "^2.2.0",
     "@mdx-js/loader": "^1.6.5",
     "@next/mdx": "^9.4.4",
     "commitizen": "^4.0.5",
