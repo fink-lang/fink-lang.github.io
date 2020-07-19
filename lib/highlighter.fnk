@@ -102,7 +102,7 @@ get_token_locs = fn ast:
           list :
             ['jsx punctuation', start_pos, start_pos + 1]
             ['tag', start_pos + 1, start_pos + 1 + len]
-            ['jsx punctuation', end_pos-3-len, end_pos-1-len]
+            ['jsx punctuation', end_pos - 3 - len, end_pos - 1 - len]
             ['tag', end_pos - 1 - len, end_pos - 1]
             ['jsx punctuation', end_pos-1, end_pos]
 

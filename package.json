@@ -27,22 +27,22 @@
     "release": "semantic-release"
   },
   "devDependencies": {
-    "@fink/cli": "^6.0.0",
-    "@fink/larix": "^10.0.1",
-    "@fink/loxia": "^10.1.1",
-    "@fink/std-lib": "^2.2.0",
-    "@mdx-js/loader": "^1.6.5",
+    "@fink/cli": "^6.1.0",
+    "@fink/larix": "^12.1.0",
+    "@fink/loxia": "^12.1.0",
+    "@fink/std-lib": "^3.1.0",
+    "@mdx-js/loader": "^1.6.11",
     "@next/mdx": "^9.4.4",
     "commitizen": "^4.0.5",
     "cz-conventional-changelog": "^3.1.0",
-    "fink-loader": "^1.0.0",
-    "jest-cli": "^26.0.1",
+    "fink-loader": "^1.1.0",
+    "jest-cli": "^26.1.0",
     "next": "^9.4.4",
     "npx-run": "^2.1.2",
     "raw-loader": "^4.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "semantic-release": "^17.0.8"
+    "semantic-release": "^17.1.1"
   },
   "config": {
     "commitizen": {
