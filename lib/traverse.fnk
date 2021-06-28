@@ -3,7 +3,7 @@
 walk_exprs = fn exprs, props:
   pipe exprs:
     map expr:
-      ...walk expr, props
+      ... walk expr, props
 
 
 walk = fn expr, props={scope: {expr}}:
