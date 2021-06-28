@@ -1,0 +1,28 @@
+React = import 'react'
+{MDXProvider} = import '@mdx-js/react'
+
+{FinkHighlighter} = import '../lib/highlighter.fnk'
+
+
+import './prism-vsc-dark-plus.css'
+
+import './page.css'
+
+
+code = fn props:
+  # console.log props
+  {children: source, ...rest_props} = props
+  <FinkHighlighter source={source} {...rest_props} />
+
+
+components = dict:
+  pre: fn props: <div {...props} />
+  code
+
+
+default = fn { Component, pageProps}:
+  <MDXProvider components={components}>
+    <Component {...pageProps} />
+  </MDXProvider>
+
+

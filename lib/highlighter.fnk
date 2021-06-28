@@ -1,0 +1,164 @@
+React = import 'react'
+{parse} = import '@fink/larix'
+{chain, length, sort} = import '@fink/std-lib/iter'
+{slice} = import '@fink/std-lib/str'
+
+{walk} = import './traverse.fnk'
+
+
+highlight_token = fn type, expr:
+  {start:{pos: start_pos}, end: {pos: end_pos}} = expr.loc
+  [type, start_pos, end_pos]
+
+
+get_token_locs = fn ast:
+  pipe walk ast:
+    map node:
+      {expr} = node
+      toks = match node:
+        {
+          parent: {expr: {type: 'call', callee: expr}}
+          expr: {type: 'ident'}
+        }:
+          [highlight_token 'function', expr]
+
+        {
+          parent: {
+            parent: {expr: {type: 'call', callee: node.parent.expr}}
+            expr: {type: 'member', right: expr}
+          }
+          expr: {type: 'ident'}
+        }:
+          [highlight_token 'function', expr]
+
+
+        {
+          parent: {expr: {type: 'object:prop', right: expr}}
+          expr: {type: 'ident'}
+        }:
+          [highlight_token 'constant', expr]
+
+        {
+          parent: {expr: {type: 'object:prop', right: {left: expr}}}
+          expr: {type: 'ident'}
+        }:
+          # covered by assignment
+          []
+
+        {
+          parent: {expr: {type: 'object:prop', left: expr}}
+          expr: {type: 'ident'}
+        }:
+          [highlight_token 'string', expr]
+
+
+        {
+          parent: {expr: {type: 'string', tag: expr}}
+          expr: {type: 'ident'}
+        }:
+          [highlight_token 'function', expr]
+
+        {expr: {type: 'string:text'}}:
+          [highlight_token 'string', expr]
+
+        {
+          parent: {expr: {type: 'member', right: expr}}
+          expr: {type: 'ident'}
+        }:
+          [highlight_token 'string', expr]
+
+
+        {expr: {type: 'ident'}}:
+          [highlight_token 'constant', expr]
+
+        {expr: {type: 'number'}}:
+          [highlight_token 'number', expr]
+
+        {expr: {type: 'partial'}}:
+          [highlight_token 'keyword', expr]
+
+        {expr: {type: 'literal'}}:
+          [highlight_token 'boolean', expr]
+
+        {expr: {op: ? in ['list', 'dict']}}:
+          {start:{pos: start_pos}} = expr.loc
+          [['keyword', start_pos, start_pos + length expr.op]]
+
+        {expr: {type: 'block', op: {}}}:
+          {start:{pos: start_pos}} = expr.loc
+          [['keyword', start_pos, start_pos + length expr.op]]
+
+        {expr: {type: 'jsx-elem', self_closing: true}}:
+          {start :{pos: start_pos}, end: {pos: end_pos}} = expr.loc
+          len = length expr.name
+          list :
+            ['jsx punctuation', start_pos, start_pos + 1]
+            ['tag', start_pos + 1, start_pos + 1 + len]
+            ['jsx punctuation', end_pos-2, end_pos]
+
+        {expr: {type: 'jsx-elem'}}:
+          {start :{pos: start_pos}, end: {pos: end_pos}} = expr.loc
+          len = length expr.name
+          list :
+            ['jsx punctuation', start_pos, start_pos + 1]
+            ['tag', start_pos + 1, start_pos + 1 + len]
+            ['jsx punctuation', end_pos - 3 - len, end_pos - 1 - len]
+            ['tag', end_pos - 1 - len, end_pos - 1]
+            ['jsx punctuation', end_pos-1, end_pos]
+
+        {expr: {type: 'jsx-attr'}}:
+          {start:{pos: start_pos}} = expr.loc
+          [['attr-name', start_pos, start_pos + length expr.name]]
+
+        {expr: {op: ? in ['try', 'throw', 'new']}}:
+          {start:{pos: start_pos}} = expr.loc
+          [['keyword', start_pos, start_pos + length expr.op]]
+
+        else:
+          # console.log node.expr.type, node.expr.op
+          []
+
+      ...toks
+
+
+token_span = fn type, value, key:
+  <span key={key} className={'token ${type}'}>{value}</span>
+
+
+highlight_content = fn source, ast:
+  tokens = chain
+    get_token_locs ast
+    [['unknown', (length source), length source]]
+
+  pipe tokens:
+    sort fn [, start_a], [, start_b]:
+      match start_a:
+        start_b: 0
+        ? > start_b: 1
+        else: -1
+
+    map [type, start_pos, end_pos], prev_end=0:
+      leading = match start_pos:
+        prev_end <= ?:
+          [slice source, prev_end, start_pos]
+        else:
+          []
+
+      value = slice source, start_pos, end_pos
+
+      rest = match type:
+        'unknown':
+          value
+        else:
+          token_span type, value, '${start_pos}:${end_pos}:${value}'
+
+      all = [...leading, rest]
+      (...all, end_pos)
+
+    [...?]
+
+
+FinkHighlighter = fn {source, ...props}:
+  ast = parse source
+  children = highlight_content source, ast
+  <pre {...props} className="language-fink"><code children={children} /></pre>
